@@ -19,7 +19,8 @@
 (when (not package-archive-contents)
       (package-refresh-contents))
 (defvar installed-packages
-  '(ace-window
+  '(ag
+    ace-window
     browse-kill-ring
     cider
     clojure-mode
