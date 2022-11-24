@@ -4,3 +4,14 @@ projectile-bookmarks.eld
 recentf
 transient
 custom.el
+cider-history
+.emacs.d
+.cache
+.lsp-session-v1
+projects
+eshell/
+url/
+straight/*
+!straight/versions
+straigh/versions/*
+!straight/versions/default.el

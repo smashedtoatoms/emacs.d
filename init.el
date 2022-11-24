@@ -1,256 +1,530 @@
-;;; init.el -- Minimal config for Common Lisp and Clojure
+;;; init.el -- Jason Legler's Emacs Config
 ;;;
 ;;; Commentary:
-;;; Shamelessly stolen from Eno Compton's Emacs config
+;;; No Spacemacs, no Doom, no Evil, just bespoke artisinal Emacs.
+;;;
+;;; Please see README.md for details
 ;;;
 
 ;;; Code:
 
-;; set gc high to speed up startup
-(setq gc-cons-threshold 100000000)
+;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Init Settings ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;
 
-;; use package to install external packages
-(require 'package)
-(add-to-list 'package-archives
-  ;; (cons "melpa-stable" "https://stable.melpa.org/packages/" )
-  (cons "melpa" "https://melpa.org/packages/")
-  t)
-(package-initialize)
-(when (not package-archive-contents)
-      (package-refresh-contents))
-(defvar installed-packages
-  '(ag
-    ace-window
-    browse-kill-ring
-    cider
-    clojure-mode
-    company
-    counsel
-    counsel-projectile
-    expand-region
-    flycheck
-    flycheck-clj-kondo
-    git-gutter
-    ivy
-    lsp-mode
-    lsp-ui
-    magit
-    markdown-mode
-    projectile
-    rainbow-delimiters
-    sly
-    smartparens
-    swiper
-    zenburn-theme))
-;; Make macOS shells work as expected
-(if (eq system-type 'darwin)
-    (add-to-list 'installed-packages 'exec-path-from-shell))
-(dolist (p installed-packages)
-  (when (not (package-installed-p p))
-        (package-install p)))
+;; Disable package.el on startup, we'll be using straight.el
+(setq package-enable-at-startup nil)
+
+
+;; Memory performance enhancements
+(setq gc-cons-threshold 100000000              ;; Set GC high to limit collections on startup
+      read-process-output-max(* 1024 1024 4))  ;; Read 4MB chunks from language server to speed it up
+
+
+;; Set window startup size to smallest size that doesn't fill me with rage
+(setq-default initial-frame-alist '((width . 120)
+                                    (height. 24))
+              default-frame-alist initial-frame-alist
+              frame-inhibit-implied-resize t)
+
+
+;; Native compile Emacs Lisp for speed
+(when(featurep 'native-compile)
+  (setq native-comp-deferred-compilation t
+        native-comp-async-report-warnings-errors nil))
+
+
+;; Load newest config files
+(setq load-prefer-newer noninteractive)
+
+
+;; Set up Markdown scratch mode
+(setq initial-major-mode 'markdown-mode      ;; Set scratch to Markdown mode instead of lisp mode
+      initial-scratch-message "# Notes\n\n") ;; Set buffer content for scratch markdown file
+
+
+;; Bootstrap Straight to manage loading and management of packages
+(defvar bootstrap-version)
+
+(let ((bootstrap-file
+       (expand-file-name "straight/repos/straight.el/bootstrap.el" user-emacs-directory))
+      (bootstrap-version 5))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/raxod502/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))        ;; Install straight.el
+(straight-use-package 'use-package)            ;; Install use-package
+
+(use-package straight
+  :custom (straight-use-package-by-default t)) ;; Use straight.el by default
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Global Look and Feel ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; Use preferred theme
+(use-package zenburn-theme
+  :config (load-theme 'zenburn t))
+
+
+;; Configure non-terminal emacs window
+(when (window-system)
+        (set-face-attribute 'default nil
+                      :height 144
+                      :family "PragmataPro Liga") ;; Set preferred font
+  (tool-bar-mode -1)                              ;; Disable toolbar
+  (scroll-bar-mode -1)                            ;; Disable scrollbar
+  (fringe-mode -1)                                ;; Disable fringe around the frame
+                (add-to-list 'default-frame-alist
+               '(ns-transparent-titlebar . t))    ;; Use a transparent menu bar
+                        (add-to-list 'default-frame-alist
+               '(ns-appearance . dark))           ;; Assume a dark colorscheme
+  (setq ns-use-proxy-icon nil                     ;; Remove icon from titlebar
+        frame-title-format nil                    ;; Remove file name from titlebar
+        frame-resize-pixelwise t                  ;; Make frame resize to the pixel
+        window-resize-pixelwise t)                ;; Make window resize to the pixel
+  (menu-bar-mode 0))                              ;; Disable the menu bar
+
+
+;; Keymapping overrides (try to keep to a minimum)
+(global-set-key (kbd "M-g") 'goto-line)          ;; use preferred binding for goto-line
+(add-hook 'eshell-mode-hook
+          '(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
+                                     (lambda ()
+                                       (interactive)
+                                       (let ((inhibit-read-only t))
+                                         (erase-buffer)
+                                         (eshell-send-input))))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Internal Global Settings ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; Buffer visual preferences
+(show-paren-mode 1)                          ;; Highlight matching parens
+(global-hl-line-mode 1)                      ;; Highlight current line
+(setq line-number-mode t                     ;; Add line number to status bar
+      column-number-mode t)                  ;; Add column number to status bar
+(size-indication-mode t)                     ;; Add size of file to status bar
+(global-display-line-numbers-mode)           ;; Enable global line numbers
+(add-hook 'text-mode-hook
+          (lambda () (setq fill-column 80))) ;; Set up text mode to have a default width of 80
+
+
+;; Behavior preferences
+(setq-default fill-column 120)               ;; Set fill column to default to 120 characters
+(setq-default indent-tabs-mode nil)          ;; Smart tab behavior-indent or complete
+(setq confirm-kill-emacs 'yes-or-no-p        ;; prompt before killing emacs
+      inhibit-startup-message t              ;; Go straight to scratch buffer on startup
+      help-window-select t                   ;; Always select the help buffer on open
+      make-backup-files nil                  ;; Disable backup files
+      create-lockfiles nil                   ;; Disable lock files
+      ring-bell-function 'ignore             ;; Disable the bell
+      select-enable-clipboard t              ;; Integrate kill-ring with copy / paste
+      select-enable-primary t                ;; Integrate kill-ring with copy / paste
+      save-interprogram-paste-before-kill t) ;; Integrate kill-ring with copy / paste
+(fset 'yes-or-no-p 'y-or-n-p)                ;; Change all yes / no questions to y / n
+(delete-selection-mode t)                    ;; Delete the selection with a keypress
+(global-auto-revert-mode t)                  ;; Revert externally modified buffers automatically
+
+
+;; Default File Mangling
+(setq require-final-newline t                            ;; Add newline at end of all files
+      tab-always-indent 'complete)                       ;; Don't use hard tabs by default
+(add-hook 'before-save-hook 'delete-trailing-whitespace) ;; Remove trailing whitespace
+
 
 ;; Move all customization information into its own file
 (setq custom-file "~/.emacs.d/custom.el")
 (load custom-file :no-error)
 
-;;; Built-in configuration
 
-;; Use a dark theme to be easy on the eyes
-(load-theme 'zenburn)
-;; prompt before killing emacs
-(setq confirm-kill-emacs 'yes-or-no-p)
-;; When running the Emacs in standalone mode:
-(when (window-system)
-      ;; Turn off the toolbar
-      (tool-bar-mode -1)
-      ;; Turn off the scrollbar
-      (scroll-bar-mode -1)
-      ;; Turn off the small fringe around the frame
-      (fringe-mode -1)
-      ;; Set up font
-      (set-face-attribute 'default nil
-                          :height 145
-                          :family "PragmataPro Liga")
-      ;; Use a transparent menu bar
-      (add-to-list 'default-frame-alist '(ns-transparent-titlebar . t))
-      ;; Assumes a dark colorscheme
-      (add-to-list 'default-frame-alist '(ns-appearance . dark))
-      ;; Removes icon from titlebar
-      (setq ns-use-proxy-icon nil)
-      ;; Removes file name from titlebar
-      (setq frame-title-format nil))
-;; Make windows and frames adjustable to the pixel
-(setq frame-resize-pixelwise t)
-(setq window-resize-pixelwise t)
-;; Turn off the menu bar
-(menu-bar-mode 0)
-;; Highlight matching paren
-(show-paren-mode 1)
-;; Highlight current line
-(global-hl-line-mode 1)
-;; Add line number to status bar
-(setq line-number-mode t)
-;; Add column number to status bar
-(setq column-number-mode t)
-;; Add size of file to status bar
-(size-indication-mode t)
-;; global line numbers
-(global-display-line-numbers-mode)
-;; Go straight to scratch buffer on startup
-(setq inhibit-startup-message t)
-;; Always select the help buffer on open
-(setq help-window-select t)
-;; Set fill column to 120 characters
-(setq-default fill-column 120)
-;; Make sure that text files are correctly formatted
-(setq require-final-newline t)
-;; Remove trailing whitespace on save
-(add-hook 'before-save-hook 'delete-trailing-whitespace)
-;; Changes all yes/no questions to y/n
-(fset 'yes-or-no-p 'y-or-n-p)
-;; Disable backup files
-(setq make-backup-files nil)
-;; Disable lock files
-(setq create-lockfiles nil)
-;; Disable the bell
-(setq ring-bell-function 'ignore)
-;; Don't use hard tabs
-(setq-default indent-tabs-mode nil)
-;; smart tab behavior - indent or complete
-(setq tab-always-indent 'complete)
-;; Configure kill-ring to integrate with copy/paste
-(setq select-enable-clipboard t
-  select-enable-primary t
-  save-interprogram-paste-before-kill t)
-;; Delete the selection with a keypress
-(delete-selection-mode t)
-;; Revert buffers automatically when underlying files are changed externally
-(global-auto-revert-mode t)
-;; Shows a list of buffers with ibuffer
-(global-set-key (kbd "C-x C-b") 'ibuffer)
-;; use better binding for goto-line
-(global-set-key (kbd "M-g") 'goto-line)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Global External Package Management ;;;;
+;; (doesn't include straight and Zenburn) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;;; External configuration
 
-;;; Configure frame management
-;; Configure ace-window
-(global-set-key (kbd "M-o") 'ace-window)
-;; Use "home row" (e.g., a, s , d, f) to jump between windows
-(setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-;; Configure browse-kill-ring
-(browse-kill-ring-default-keybindings)
+;; Modeline theme
+(use-package telephone-line
+  :config
+  (setq telephone-line-lhs
+        '((accent . (telephone-line-vc-segment
+                     telephone-line-erc-modified-channels-segment
+                     telephone-line-process-segment))
+          (nil    . (telephone-line-projectile-buffer-segment))))
+  (setq telephone-line-rhs
+        '((nil    . (telephone-line-flycheck-segment
+                     telephone-line-flymake-segment
+                     telephone-line-major-mode-segment
+                     telephone-line-misc-info-segment))
+          (accent   . (telephone-line-airline-position-segment))))
+  (setq telephone-line-primary-left-separator 'telephone-line-cubed-left
+        telephone-line-secondary-left-separator 'telephone-line-cubed-hollow-left
+        telephone-line-primary-right-separator 'telephone-line-cubed-right
+        telephone-line-secondary-right-separator 'telephone-line-cubed-hollow-right
+        telephone-line-height 24
+        telephone-line-evil-use-short-tag t)
+  (telephone-line-mode t))
 
-;;; Configure sly
-;; Ctrl-Enter to eval
-(add-hook 'sly-mode-hook (lambda () (local-set-key (kbd "<C-return>") 'sly-eval-last-expression)))
-;; Enable smartparns for common lisp
-(add-hook 'sly-mode-hook 'smartparens-strict-mode)
-;; Enable Rainbow delimiters mode for common lisp
-(add-hook 'sly-mode-hook 'rainbow-delimiters-mode)
 
-;;; Configure Cider
-;; When there's a cider error, show its buffer
-(setq cider-show-error-buffer t)
-;; Where to store the cider history
-(setq cider-repl-history-file "~/.emacs.d/cider-history")
-;; Enable smartparens in the REPL
-(add-hook 'cider-repl-mode-hook 'smartparens-strict-mode)
-;; When switching to the REPL, show it in the current window
-(setq cider-repl-display-in-current-window t)
-;; Disable the Cider help message
-(setq cider-repl-display-help-banner nil)
-;; Just go to the symbol under the point; don't ask
-(setq cider-prompt-for-symbol nil)
+;; Make Emacs commands easier to find as you type
+(use-package which-key
+  :config
+  (which-key-mode))
 
-;; Configure clojure-mode
-;; Ctrl-Enter to eval
-(add-hook 'clojure-hook-mode (lambda () (local-set-key (kbd "<C-return>") 'cider-eval-last-sexp)))
-;; Enable smartparns for Clojure
-(add-hook 'clojure-mode-hook 'smartparens-strict-mode)
-;; Enable Rainbow delimiters mode
-(add-hook 'clojure-mode-hook 'rainbow-delimiters-mode)
-;; This is useful for working with camel-case tokens, like names of
-;; Java classes (e.g. JavaClassName)
-(add-hook 'clojure-mode-hook 'subword-mode)
-;; Use clojure mode for other extensions
-(add-to-list 'auto-mode-alist '("\\.edn$" . clojure-mode))
-(add-to-list 'auto-mode-alist '("\\.boot$" . clojure-mode))
 
-;; Company (complete anything)
-;; Enable in all buffers
-(add-hook 'after-init-hook 'global-company-mode)
-;; Show numbers alongside the completion dialoge. Select with M-<number>
-(setq company-show-numbers t)
-;; Stop downcasing auto-completion results
-(setq company-dabbrev-downcase nil)
+;; In buffer auto-complete
+(use-package company
+  :commands company-mode
+  :init
+  (add-hook 'after-init-hook 'global-company-mode) ;; Enable in all buffers
+  (setq company-show-numbers t                     ;; Show numbers alongside the completeion dialogue.Select with M-<number>
+        company-dabbrev-downcase nil))             ;; Stop downcasing auth-completion results
 
-;; Enable counsel-projectile to get an Ivy-like interface in projectile
-(counsel-projectile-mode 1)
 
-;; Set up projectile find file
-(global-set-key (kbd "C-c p f") 'projectile-find-file)
+;; Generic narrowing-completion mechanism for lists in Emacs
+(use-package ivy
+  :config
+  (ivy-mode 1)
+  (setq ivy-use-virtual-buffers t
+        ivy-count-format "(%d/%d) ")
+  (global-set-key (kbd "C-s") 'swiper)
+  (global-set-key (kbd "M-x") 'counsel-M-x)
+  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
+  (global-set-key (kbd "C-c C-r") 'ivy-resume))
 
-;; Configure exec-path-from shell
-(when (memq window-system '(mac ns))
-      (exec-path-from-shell-initialize)
-      (exec-path-from-shell-copy-envs
-       '("PATH")))
 
-;; Configure expand-region
-(global-set-key (kbd "C-c n") 'er/expand-region)
+;; Ivy-enhanced versions of common Emacs commands
+(use-package counsel)
 
-;; Enable clj-kondo flychecking
-(global-flycheck-mode)
-(require 'flycheck-clj-kondo)
 
-;; Configure Ivy
-(ivy-mode 1)
-(setq ivy-use-virtual-buffers t)
-(setq ivy-count-format "(%d/%d) ")
-(global-set-key (kbd "C-s") 'swiper)
-(global-set-key (kbd "M-x") 'counsel-M-x)
-(global-set-key (kbd "C-x C-f") 'counsel-find-file)
-(global-set-key (kbd "C-c C-r") 'ivy-resume)
+;; Ivy UI for Projectile
+(use-package counsel-projectile
+  :config
+  (counsel-projectile-mode 1))
 
-;; lsp
-(setq lsp-prefer-flymake nil)
-(setq lsp-enable-on-type-formatting t)
-(setq lsp-before-save-edits t)
-(add-hook 'lsp-mode-hook 'lsp-ui-mode)
 
-;; git
-(global-set-key (kbd "C-c g") 'magit-status)
-(global-git-gutter-mode +1)
+;; Search through results sets in Emacs lists
+(use-package swiper)
 
-;; projectile
-(projectile-mode +1)
-(define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
-(setq projectile-project-search-path '("~/workspace/"))
-(setq projectile-globally-ignored-directories '("-/target"))
-(setq projectile-completion-system 'ivy)
 
-;; smartparens
-(require 'smartparens-config)
-(add-hook 'emacs-lisp-mode-hook #'smartparens-strict-mode)
-(global-set-key (kbd "C-c h") 'sp-backward-slurp-sexp)
-(global-set-key (kbd "C-c j") 'sp-backward-barf-sexp)
-(global-set-key (kbd "C-c k") 'sp-forward-barf-sexp)
-(global-set-key (kbd "C-c l") 'sp-forward-slurp-sexp)
-(global-set-key (kbd "C-c r") 'sp-splice-sexp-killing-backward)
-(global-set-key (kbd "C-c s") 'sp-splice-sexp)
-(global-set-key (kbd "C-c q") 'sp-indent-defun)
-(global-set-key (kbd "C-M-f") 'sp-forward-sexp)
-(global-set-key (kbd "C-M-b") 'sp-backward-sexp)
+;; Efficient syntax highlighting framework
+(use-package tree-sitter
+  :config
+  (require 'tree-sitter)
+  (global-tree-sitter-mode)
+  :hook ((tree-sitter-after-on-hook . tree-sitter-hl-mode)))
 
-;;markdown
-(add-hook 'markdown-mode-hook (lambda () (setq fill-column 80)))
 
-;;text
-(add-hook 'text-mode-hook (lambda () (setq fill-column 80)))
+;; Language parsers for syntax highlighting
+(use-package tree-sitter-langs
+  :config
+  (require 'tree-sitter-langs))
 
-;;;custom functions
-(global-set-key (kbd "C-c w") 'toggle-truncate-lines)
+
+;; The best git client ever
+(use-package magit)
+
+
+;; Have TODOs show up in magit
+(use-package magit-todos
+  :config
+  :hook magit-mode)
+
+
+;; Git gutter, so I can see the damage done
+(use-package git-gutter
+  :config
+  (global-git-gutter-mode +1))
+
+
+;; The best way to manage multiple projects at once in one editor
+(use-package projectile
+  :config
+  (projectile-mode +1)
+  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
+  (setq projectile-project-search-path '("~/workspace/")
+        projectile-globally-ignored-directories '("-/target")
+        projectile-completion-system 'ivy))
+
+
+;; Linting
+(use-package flycheck
+  :commands global-flycheck-mode)
+
+
+;; Pull environment variables from shell if using macOS
+(use-package exec-path-from-shell
+  :if (eq system-type 'darwin)
+  :config
+  (when (memq window-system '(mac ns))
+    (exec-path-from-shell-initialize)
+    (exec-path-from-shell-copy-envs '("PATH")))) ;; Pull path from shell so commands work correctly
+
+
+;; Set environment variables with direnv
+(use-package direnv
+ :config
+ (direnv-mode))
+
+
+;; Search
+(use-package rg
+  :config
+  (rg-enable-menu))
+
+
+;; Make it easier to access what you've copied in the past
+(use-package browse-kill-ring)
+
+
+;; Quick window switching in Emacs
+(use-package ace-window
+  :config
+  (global-set-key (kbd "M-o") 'ace-window)     ;; Switch between two windows quickly
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ;; Set default keybindings for kill-ring
+  (browse-kill-ring-default-keybindings))      ;; Switch between lots of windows quickly
+
+
+;; Parenthesis management
+(use-package smartparens
+  :config
+  (require 'smartparens-config)
+  (global-set-key (kbd "C-c b") 'sp-forward-barf-sexp)
+  (global-set-key (kbd "C-c f") 'sp-forward-slurp-sexp)
+  (global-set-key (kbd "C-c d") 'sp-unwrap-sexp))
+
+
+;; Rainbow delimiters
+(use-package rainbow-delimiters
+  :config
+  (require 'rainbow-delimiters))
+
+
+;; Expand region selection
+(use-package expand-region
+  :config
+  (global-set-key (kbd "C-c n") 'er/expand-region))
+
+
+;; Make it easy to move lines around
+(use-package drag-stuff
+  :config
+  (drag-stuff-define-keys)  ;; This uses <M-up>, <M-down>, <M-right>, and <M-left>
+  (drag-stuff-global-mode))
+
+
+;; LSP integration
+(use-package lsp-mode
+  :config
+  (setq lsp-prefer-flymake nil             ;; use flycheck
+        lsp-enable-on-type-formatting t    ;; format on type
+        lsp-enable-which-key-integration t ;; setup whichkey integration for lsp
+        lsp-before-save-edits t))          ;; apply lsp suggested edits prior to saving
+
+
+;; LSP UI integration
+(use-package lsp-ui
+  :hook lsp-mode
+  :config
+  (setq lsp-ui-doc-enable nil        ;; disable doc popups, just use modeline
+        lsp-ui-sideline-enable nil)) ;; disable sideline, just use modeline
+
+
+;; Language snippets
+(use-package yasnippet)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Language Modes ;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;; Markdown
+(use-package markdown-mode
+  :commands markdown-mode
+  :mode (("README\\.md\\'" . markdown-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :hook ((markdown-mode . (lambda () (setq fill-column 80)))
+         (markdown-mode . auto-fill-mode)
+         (markdown-mode . smartparens-global-strict-mode)
+         (markdown-mode . rainbow-delimiters-mode))
+  :custom
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-command "pandoc")
+  (markdown-hr-display-char nil)
+  (markdown-list-item-bullets '("-")))
+
+
+;; Yaml
+(use-package yaml-mode
+  :commands yaml-mode
+  :hook ((yaml-mode . lsp-mode)
+         (yaml-mode . (lambda ()
+                        (define-key yaml-mode-map "\C-m" 'newline-and-indent)))))
+
+
+;; Typescript
+;;; Set up typescript mode
+(use-package typescript-mode
+  :commands typescript-mode
+  :hook ((typescript-mode . smartparens-strict-mode)
+         (typescript-mode . rainbow-delimiters-mode)
+         (typescript-mode . lsp-mode)
+         (typescript-mode . prettier-mode)
+         (typescript-mode . jest-test-mode))
+  :config
+  (setq typescript-indent-level 2))
+
+;;; Set up prettier to start up in typescript-mode
+(use-package prettier)
+
+;;; Set up jest testing shortcuts in typescript mode
+(use-package jest-test-mode)
+
+
+;; Web
+;; Add tailwind
+(straight-use-package
+ '(lsp-tailwindcss :type git :host github :repo "merrickluo/lsp-tailwindcss"))
+
+;; Configure web-mode primarily for working with elixir's phoenix templates
+(use-package web-mode
+  :mode (("\\.html.heex\\'" . web-mode))
+  :hook ((web-mode . lsp-mode))
+  :config
+  (setq web-mode-markup-indent-offset 2)
+  (add-to-list 'lsp-language-id-configuration '(".*\\.html.heex$" . "html")) ;; add heex to lsp languagess
+  (setq web-mode-engines-alist'(("html"    . "\\.html.heex\\'"))))           ;; add elixir as engine for heex
+
+
+;; Go
+(use-package go-mode
+  :commands go-mode
+  :hook ((go-mode . lsp-mode)
+         (go-mode . smartparens-strict-mode)
+         (go-mode . rainbow-delimiters-mode)
+         (go-mode . (lambda ()
+                      (add-hook 'before-save-hook 'lsp-organize-imports t t) ;; fix imports on save
+                      (add-hook 'before-save-hook 'lsp-format-buffer t t)))) ;; format on save
+  :config
+  (setq-default tab-width 4))
+
+
+;; Python
+(use-package python-mode
+  :commands python-mode
+  :hook ((python-mode . lsp-mode)                    ;; enable lsp
+         (python-mode . smartparens-strict-mode)     ;; enable smartparens
+         (python-mode . rainbow-delimiters-mode)     ;; enable rainbow delimiters
+         (python-mode . pyvenv-tracking-mode)        ;; show venv in modeline
+         (python-mode . python-black-on-save-mode))) ;; format on save
+
+;;; Linting using black linter
+(use-package python-black
+  :commands python-mode)
+
+;;; Virtual env management
+(use-package pyvenv
+  :commands python-mode)
+
+;;; Automatic virtualenv management
+(use-package auto-virtualenv
+  :commands python-mode
+  :hook ((python-mode . auto-virtualenv-set-virtualenv)
+         (projectile-after-switch-project . auto-virtualenv-set-virtualenv)))
+
+
+;; Rust
+(use-package rustic
+  :commands rust-mode
+  :hook ((rust-mode . lsp-mode)
+         (rust-mode . smartparens-strict-mode)
+         (rust-mode . rainbow-delimiters-mode)))
+
+(use-package toml-mode
+  :commands toml-mode)
+
+
+;;  Elixir
+(use-package elixir-mode
+  :commands elixir-mode
+  :hook ((elixir-mode . lsp-mode)
+         (elixir-mode . smartparens-strict-mode)
+         (elixir-mode . rainbow-delimiters-mode)
+         (elixir-mode . (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+         (elixir-mode . (lambda () (add-hook 'elixir-format-hook
+                                             (lambda ()
+                                               (if (projectile-project-p)
+                                                   (setq elixir-format-arguments
+                                                         (list "--dot-formatter"
+                                                               (concat (locate-dominating-file
+                                                                        buffer-file-name
+                                                                        ".formatter.")
+                                                                       ".formatter.exs")))
+                                                 (setq elixir-format-arguments nil))))))))
+
+(use-package flycheck-credo
+  :commands elixir-mode)
+
+
+;; Zig
+(use-package zig-mode
+  :commands zig-mode
+  :mode (("\\.zig\\'" . zig-mode))
+  :hook ((zig-mode . lsp-mode)))
+
+
+;; Emacs Lisp
+(add-hook 'emacs-lisp-mode-hook 'smartparens-strict-mode)
+(add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+
+
+;; Sly (Common Lisp)
+(use-package sly
+  :commands sly-mode
+  :mode (("\\.cl$" . sly-mode))
+  :hook ((sly-mode . rainbow-delimiters-mode)
+         (sly-mode . smartparens-strict-mode)))
+
+
+;; Clojure
+;;; Clojure linter
+(use-package flycheck-clj-kondo
+  :commands clojure-mode)
+
+;;; Clojure REPL
+(use-package cider
+  :commands clojure-mode
+  :hook ((cider-mode . rainbow-delimiters-mode)
+         (cider-mode . smartparens-strict-mode))
+  :config
+  (setq cider-show-error-buffer                            ;; When there's a cider error, show its buffer
+        cider-repl-history-file "~/.emacs.d/cider-history" ;; Where to store the cider history
+        cider-repl-display-in-current-window t             ;; When switching to the REPL, show it in the current window
+        cider-repl-display-help-banner nil                 ;; Disable the Cider help message
+        cider-prompt-for-symbol nil))                      ;; Just go to the symbol under the point; don't ask
+
+;;; Clojure mode
+(use-package clojure-mode
+  :commands clojure-mode
+  :mode (("\\.edn$" . clojure-mode)   ;; associate .edn files
+         ("\\.boot$" . clojure-mode)) ;; associate .boot files
+  :config (require 'flycheck-clj-kondo)
+  :hook ((clojure-mode . smartparens-strict-mode)
+         (clojure-mode . rainbow-delimiters-mode)
+         (clojure-mode . subword-mode)))
+
 
 (provide 'init)
 ;;; init.el ends here
