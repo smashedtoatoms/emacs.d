@@ -12,6 +12,7 @@ projectile-bookmarks.eld
 .lsp-session-v1
 cider-history
 .persistent-scratch
+.mc-lists.el
 straight/*
 !straight/versions
 straigh/versions/*

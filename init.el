@@ -323,6 +323,16 @@
   (drag-stuff-global-mode))
 
 
+;; Multiple cursors
+(use-package multiple-cursors
+  :bind (("M-s-<mouse-1>" . mc/add-cursor-on-click)
+         ("M-s-<down>" . mc/mmlte--down)
+         ("M-s-<up>" . mc/mmlte--up)
+         ("M-s-<left>" . mc/mark-previous-like-this)
+         ("M-s-<right>" . mc/mark-next-like-this)
+         ("M-s-a" . mc/mark-all-like-this)))
+
+
 ;; persistent scratch
 (use-package persistent-scratch
   :config
