@@ -387,7 +387,8 @@
   (setq typescript-indent-level 2))
 
 ;;; Set up prettier to start up in typescript-mode
-(use-package prettier)
+(use-package prettier
+  :defer) ;; prettier likes to start no matter what, this stops it
 
 ;;; Set up jest testing shortcuts in typescript mode
 (use-package jest-test-mode)
