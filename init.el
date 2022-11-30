@@ -323,6 +323,12 @@
   (drag-stuff-global-mode))
 
 
+;; persistent scratch
+(use-package persistent-scratch
+  :config
+  (persistent-scratch-setup-default))
+
+
 ;; LSP integration
 (use-package lsp-mode
   :config
