@@ -94,6 +94,7 @@
 
 ;; Keymapping overrides (try to keep to a minimum)
 (global-set-key (kbd "M-g") 'goto-line)          ;; use preferred binding for goto-line
+(put 'kill-current-buffer 'disabled t)           ;; disable cmd-k since hitting it in Emacs is catastrophic and I keep doing it.
 (add-hook 'eshell-mode-hook
           '(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
                                      (lambda ()
@@ -363,6 +364,15 @@
 
 ;; Language snippets
 (use-package yasnippet)
+
+
+;; Postgres Convenience
+(defun pg-scratch ()
+  (interactive)
+  (switch-to-buffer "*sql-scratch*")
+  (sql-mode)
+  (sql-set-product "postgres")
+  (sql-set-sqli-buffer))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;
