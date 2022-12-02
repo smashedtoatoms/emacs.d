@@ -233,8 +233,7 @@
 
 ;; Language parsers for syntax highlighting
 (use-package tree-sitter-langs
-  :config
-  (require 'tree-sitter-langs))
+  :hook tree-sitter)
 
 
 ;; The best git client ever
@@ -342,7 +341,7 @@
 ;; persistent scratch
 (use-package persistent-scratch
   :config
-  (persistent-scratch-setup-default))
+  (persistent-scratch-autosave-mode 1))
 
 
 ;; LSP integration
