@@ -96,14 +96,14 @@
 (global-set-key (kbd "M-g") 'goto-line)          ;; use preferred binding for goto-line
 (put 'kill-current-buffer 'disabled t)           ;; disable cmd-k since hitting it in Emacs is catastrophic and I keep doing it.
 (add-hook 'eshell-mode-hook
-          '(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
+          #'(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
                                      (lambda ()
                                        (interactive)
                                        (let ((inhibit-read-only t))
                                          (erase-buffer)
                                          (eshell-send-input))))))
 (add-hook 'sql-interactive-mode-hook
-          '(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
+          #'(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
                                      (lambda ()
                                        (interactive)
                                        (erase-buffer)))))
