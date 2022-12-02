@@ -362,6 +362,12 @@
         lsp-ui-sideline-enable nil)) ;; disable sideline, just use modeline
 
 
+;;; format on save for all the languages
+(use-package apheleia
+  :config
+  (apheleia-global-mode +1))
+
+
 ;; Language snippets
 (use-package yasnippet)
 
@@ -405,21 +411,28 @@
                         (define-key yaml-mode-map "\C-m" 'newline-and-indent)))))
 
 
-;; Typescript
+;; Typescript/Javascript
 ;;; Set up typescript mode
 (use-package typescript-mode
   :commands typescript-mode
   :hook ((typescript-mode . smartparens-strict-mode)
          (typescript-mode . rainbow-delimiters-mode)
          (typescript-mode . lsp-mode)
-         (typescript-mode . prettier-mode)
          (typescript-mode . jest-test-mode))
   :config
+  (define-derived-mode typescriptreact-mode typescript-mode "Typescript TSX")
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
   (setq typescript-indent-level 2))
 
-;;; Set up prettier to start up in typescript-mode
-(use-package prettier
-  :defer) ;; prettier likes to start no matter what, this stops it
+;;; great tree-sitter-based indentation for typescript/tsx, css, json
+(use-package tsi
+  :straight (tsi :type git :host github :repo "orzechowskid/tsi.el")
+  :commands (tsi-typescript-mode tsi-json-mode tsi-css-mode)
+  :hook ((typescript-mode . (lambda () (tsi-typescript-mode 1)))
+         (json-mode . (lambda () (tsi-json-mode 1)))
+         (css-mode . (lambda () (tsi-css-mode 1)))
+         (scss-mode . (lambda () (tsi-scss-mode 1)))))
 
 ;;; Set up jest testing shortcuts in typescript mode
 (use-package jest-test-mode)
@@ -447,8 +460,7 @@
          (go-mode . smartparens-strict-mode)
          (go-mode . rainbow-delimiters-mode)
          (go-mode . (lambda ()
-                      (add-hook 'before-save-hook 'lsp-organize-imports t t) ;; fix imports on save
-                      (add-hook 'before-save-hook 'lsp-format-buffer t t)))) ;; format on save
+                      (add-hook 'before-save-hook 'lsp-organize-imports t t)))) ;; fix imports on save
   :config
   (setq-default tab-width 4))
 
@@ -459,12 +471,7 @@
   :hook ((python-mode . lsp-mode)                    ;; enable lsp
          (python-mode . smartparens-strict-mode)     ;; enable smartparens
          (python-mode . rainbow-delimiters-mode)     ;; enable rainbow delimiters
-         (python-mode . pyvenv-tracking-mode)        ;; show venv in modeline
-         (python-mode . python-black-on-save-mode))) ;; format on save
-
-;;; Linting using black linter
-(use-package python-black
-  :commands python-mode)
+         (python-mode . pyvenv-tracking-mode)))      ;; show venv in modeline
 
 ;;; Virtual env management
 (use-package pyvenv
@@ -493,18 +500,7 @@
   :commands elixir-mode
   :hook ((elixir-mode . lsp-mode)
          (elixir-mode . smartparens-strict-mode)
-         (elixir-mode . rainbow-delimiters-mode)
-         (elixir-mode . (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
-         (elixir-mode . (lambda () (add-hook 'elixir-format-hook
-                                             (lambda ()
-                                               (if (projectile-project-p)
-                                                   (setq elixir-format-arguments
-                                                         (list "--dot-formatter"
-                                                               (concat (locate-dominating-file
-                                                                        buffer-file-name
-                                                                        ".formatter.")
-                                                                       ".formatter.exs")))
-                                                 (setq elixir-format-arguments nil))))))))
+         (elixir-mode . rainbow-delimiters-mode)))
 
 (use-package flycheck-credo
   :commands elixir-mode)
