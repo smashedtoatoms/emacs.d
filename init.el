@@ -38,11 +38,6 @@
 (setq load-prefer-newer noninteractive)
 
 
-;; Set up Markdown scratch mode
-(setq initial-major-mode 'markdown-mode      ;; Set scratch to Markdown mode instead of lisp mode
-      initial-scratch-message "# Notes\n\n") ;; Set buffer content for scratch markdown file
-
-
 ;; Bootstrap Straight to manage loading and management of packages
 (defvar bootstrap-version)
 
@@ -61,6 +56,25 @@
 
 (use-package straight
   :custom (straight-use-package-by-default t)) ;; Use straight.el by default
+
+
+;; Markdown (declared early to more easily set *scratch* buffer mode)
+(use-package markdown-mode
+  :commands markdown-mode
+  :mode (("README\\.md\\'" . markdown-mode)
+         ("\\.md\\'" . markdown-mode)
+         ("\\.markdown\\'" . markdown-mode))
+  :hook ((markdown-mode . (lambda () (setq fill-column 80)))
+         (markdown-mode . auto-fill-mode)
+         (markdown-mode . smartparens-global-strict-mode)
+         (markdown-mode . rainbow-delimiters-mode))
+  :custom
+  (markdown-fontify-code-blocks-natively t)
+  (markdown-command "pandoc")
+  (markdown-hr-display-char nil)
+  (markdown-list-item-bullets '("-"))
+  (setq initial-major-mode 'markdown-mode       ;; Set *scratch* to Markdown mode instead of lisp mode
+        initial-scratch-message "# Notes\n\n")) ;; Set buffer content for scratch markdown file
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -153,10 +167,11 @@
 (load custom-file :no-error)
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;; Global External Package Management ;;;;
-;; (doesn't include straight and Zenburn) ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;; Global External Package Management ;;;;;;
+;;;; (other than straight, zenburn, and ;;;;;;
+;; markdown, which were referenced earlier) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
 ;; Modeline theme
@@ -383,23 +398,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Language Modes ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-;; Markdown
-(use-package markdown-mode
-  :commands markdown-mode
-  :mode (("README\\.md\\'" . markdown-mode)
-         ("\\.md\\'" . markdown-mode)
-         ("\\.markdown\\'" . markdown-mode))
-  :hook ((markdown-mode . (lambda () (setq fill-column 80)))
-         (markdown-mode . auto-fill-mode)
-         (markdown-mode . smartparens-global-strict-mode)
-         (markdown-mode . rainbow-delimiters-mode))
-  :custom
-  (markdown-fontify-code-blocks-natively t)
-  (markdown-command "pandoc")
-  (markdown-hr-display-char nil)
-  (markdown-list-item-bullets '("-")))
 
 
 ;; Yaml
