@@ -264,6 +264,9 @@
 ;; Git gutter, so I can see the damage done
 (use-package git-gutter
   :config
+  (global-set-key (kbd "C-c g r") 'git-gutter:revert-hunk)   ;; Revert hunk where cursor is
+  (global-set-key (kbd "C-c g n") 'git-gutter:next-hunk)     ;; Jump to next hunks
+  (global-set-key (kbd "C-c g p") 'git-gutter:previous-hunk) ;; Jump to previous hunk
   (global-git-gutter-mode +1))
 
 
