@@ -10,8 +10,8 @@ settings.  Feel free to leave ones out that you don't think you'll use, but be
 aware that things will get weird if you try to use those packages without their
 underlying dependencies._
 
-- [Emacs](https://www.gnu.org/) - Emacs, I just install the dumbest one from
-  [here](https://emacsformacosx.com/)
+- [Emacs](https://www.gnu.org/) - Emacs, I use [this
+  one](https://github.com/d12frosted/homebrew-emacs-plus#emacs-29)
 - [ripgrep](https://github.com/BurntSushi/ripgrep) - search: `brew install
   ripgrep`
 - [pandoc](https://pandoc.org/) - Markdown renderer: `brew install pandoc`
