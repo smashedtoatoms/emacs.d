@@ -61,11 +61,9 @@
 ;; Markdown (declared early to more easily set *scratch* buffer mode)
 (use-package markdown-mode
   :commands markdown-mode
-  :mode (("README\\.md\\'" . markdown-mode)
-         ("\\.md\\'" . markdown-mode)
+  :mode (("\\.md\\'" . markdown-mode)
          ("\\.markdown\\'" . markdown-mode))
-  :hook ((markdown-mode . (lambda () (setq fill-column 80)))
-         (markdown-mode . auto-fill-mode)
+  :hook ((markdown-mode . auto-fill-mode)
          (markdown-mode . smartparens-global-strict-mode)
          (markdown-mode . rainbow-delimiters-mode))
   :custom
@@ -102,8 +100,8 @@
   (setq ns-use-proxy-icon nil                     ;; Remove icon from titlebar
         frame-title-format nil                    ;; Remove file name from titlebar
         frame-resize-pixelwise t                  ;; Make frame resize to the pixel
-        window-resize-pixelwise t)                ;; Make window resize to the pixel
-  (menu-bar-mode 0))                              ;; Disable the menu bar
+        window-resize-pixelwise t))               ;; Make window resize to the pixel
+(menu-bar-mode 0) ;; Disable the menu bar
 
 
 ;; Difficult-to-categorize Keymapping overrides
@@ -212,30 +210,24 @@
         company-dabbrev-downcase nil))             ;; Stop downcasing auth-completion results
 
 
-;; Generic narrowing-completion mechanism for lists in Emacs
-(use-package ivy
+;; Annotate the "margins" of the mini-buffer
+(use-package marginalia
+  :init
+  (marginalia-mode))
+
+
+;; Generic narrowing-completion mechanism for lists in Emacs (instead of Ivy)
+(use-package vertico
   :config
-  (ivy-mode 1)
-  (setq ivy-use-virtual-buffers t
-        ivy-count-format "(%d/%d) ")
-  (global-set-key (kbd "C-s") 'swiper)
-  (global-set-key (kbd "M-x") 'counsel-M-x)
-  (global-set-key (kbd "C-x C-f") 'counsel-find-file)
-  (global-set-key (kbd "C-c C-r") 'ivy-resume))
+  (vertico-mode)
+  (global-set-key (kbd "C-s") 'consult-line)              ;; in-buffer search
+  (global-set-key (kbd "C-S") 'consult-ripgrep)           ;; ripgrep search
+  (global-set-key (kbd "M-X" ) 'execute-extended-command) ;; emacs commands
+  (global-set-key (kbd "C-x C-f") `find-file))            ;; find file by fuzzy name
 
 
-;; Ivy-enhanced versions of common Emacs commands
-(use-package counsel)
-
-
-;; Ivy UI for Projectile
-(use-package counsel-projectile
-  :config
-  (counsel-projectile-mode 1))
-
-
-;; Search through results sets in Emacs lists
-(use-package swiper)
+;; Completing read of Emacs commands (instead of counsel)
+(use-package consult)
 
 
 ;; Efficient syntax highlighting framework
@@ -303,12 +295,6 @@
  (direnv-mode))
 
 
-;; Search
-(use-package rg
-  :config
-  (rg-enable-menu))
-
-
 ;; Make it easier to access what you've copied in the past
 (use-package browse-kill-ring)
 
@@ -369,7 +355,6 @@
 (use-package lsp-mode
   :config
   (setq lsp-prefer-flymake nil             ;; use flycheck
-        lsp-enable-on-type-formatting t    ;; format on type
         lsp-enable-which-key-integration t ;; setup whichkey integration for lsp
         lsp-before-save-edits t))          ;; apply lsp suggested edits prior to saving
 
