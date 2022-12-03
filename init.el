@@ -243,6 +243,9 @@
   :config
   (require 'tree-sitter)
   (global-tree-sitter-mode)
+  (define-derived-mode typescriptreact-mode typescript-mode "Typescript TSX")        ;; add custom react mode
+  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))              ;; add custom react mode
+  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx)) ;; add custom react mode
   :hook ((tree-sitter-after-on-hook . tree-sitter-hl-mode)))
 
 
@@ -418,11 +421,9 @@
   :hook ((typescript-mode . smartparens-strict-mode)
          (typescript-mode . rainbow-delimiters-mode)
          (typescript-mode . lsp-mode)
-         (typescript-mode . jest-test-mode))
+         (typescript-mode . jest-test-mode)
+         (typescript-mode . tree-sitter-mode))
   :config
-  (define-derived-mode typescriptreact-mode typescript-mode "Typescript TSX")
-  (add-to-list 'auto-mode-alist '("\\.tsx?\\'" . typescriptreact-mode))
-  (add-to-list 'tree-sitter-major-mode-language-alist '(typescriptreact-mode . tsx))
   (setq typescript-indent-level 2))
 
 ;;; great tree-sitter-based indentation for typescript/tsx, css, json
