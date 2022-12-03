@@ -92,9 +92,9 @@
   (menu-bar-mode 0))                              ;; Disable the menu bar
 
 
-;; Keymapping overrides (try to keep to a minimum)
-(global-set-key (kbd "M-g") 'goto-line)          ;; use preferred binding for goto-line
-(put 'kill-current-buffer 'disabled t)           ;; disable cmd-k since hitting it in Emacs is catastrophic and I keep doing it.
+;; Difficult-to-categorize Keymapping overrides
+(global-set-key (kbd "M-g") 'goto-line)           ;; use preferred binding for goto-line
+(put 'kill-current-buffer 'disabled t)            ;; disable cmd-k since it is catastrophic and I keep doing it.
 (add-hook 'eshell-mode-hook
           #'(lambda () (local-set-key (kbd "s-k") ;; Make cmd-k clear the shell to account for decades of muscle memory
                                      (lambda ()
@@ -193,7 +193,7 @@
   :commands company-mode
   :init
   (add-hook 'after-init-hook 'global-company-mode) ;; Enable in all buffers
-  (setq company-show-numbers t                     ;; Show numbers alongside the completeion dialogue.Select with M-<number>
+  (setq company-show-numbers t                     ;; Show numbers alongside the completeion dialogue.
         company-dabbrev-downcase nil))             ;; Stop downcasing auth-completion results
 
 
