@@ -373,9 +373,7 @@
 
 
 ;; DAP mode (lsp debugger integration)
-(use-package dap-mode
-  :config
-  (require 'dap-node))
+(use-package dap-mode)
 
 
 ;;; format on save for all the languages
@@ -422,6 +420,7 @@
          (typescript-mode . dap-mode))
   :config
   (setq typescript-indent-level 2)
+  (require 'dap-node)
   (dap-node-setup))
 
 ;;; great tree-sitter-based indentation for typescript/tsx, css, json
@@ -499,7 +498,9 @@
   :commands elixir-mode
   :hook ((elixir-mode . lsp-mode)
          (elixir-mode . smartparens-strict-mode)
-         (elixir-mode . rainbow-delimiters-mode)))
+         (elixir-mode . rainbow-delimiters-mode))
+  :config
+  (require 'dap-elixir))
 
 (use-package flycheck-credo
   :commands elixir-mode)
