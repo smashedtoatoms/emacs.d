@@ -367,6 +367,12 @@
         lsp-ui-sideline-enable nil)) ;; disable sideline, just use modeline
 
 
+;; DAP mode (lsp debugger integration)
+(use-package dap-mode
+  :config
+  (require 'dap-node))
+
+
 ;;; format on save for all the languages
 (use-package apheleia
   :config
@@ -407,9 +413,11 @@
          (typescript-mode . rainbow-delimiters-mode)
          (typescript-mode . lsp-mode)
          (typescript-mode . jest-test-mode)
-         (typescript-mode . tree-sitter-mode))
+         (typescript-mode . tree-sitter-mode)
+         (typescript-mode . dap-mode))
   :config
-  (setq typescript-indent-level 2))
+  (setq typescript-indent-level 2)
+  (dap-node-setup))
 
 ;;; great tree-sitter-based indentation for typescript/tsx, css, json
 (use-package tsi

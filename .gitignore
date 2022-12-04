@@ -13,6 +13,7 @@ projectile-bookmarks.eld
 cider-history
 .persistent-scratch
 .mc-lists.el
+.dap-breakpoints
 eln-cache/
 straight/*
 !straight/versions
