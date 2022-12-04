@@ -1,3 +1,6 @@
+![image info](./screenshots/normal.png)
+
+
 # SmashedToAtoms Emacs Config
 
 No Spacemacs, no Doom, no Evil, just bespoke artisinal Emacs.
@@ -80,3 +83,6 @@ I have turned almost all of it off.  It's Emacs, it's supposed to look like
 this.  This config tries not to use sideline or popups for any messaging.  When
 I encounter them, I try to shut them off and just use the modeline or a separate
 buffer as much as possible.
+
+
+![image info](./screenshots/search.png)
