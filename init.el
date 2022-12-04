@@ -220,8 +220,9 @@
 (use-package vertico
   :config
   (vertico-mode)
-  (global-set-key (kbd "C-s") 'consult-line)              ;; in-buffer search
-  (global-set-key (kbd "C-S") 'consult-ripgrep)           ;; ripgrep search
+  (global-set-key (kbd "C-s") 'isearch-forward)           ;; in-buffer search forward
+  (global-set-key (kbd "C-r") 'isearch-backward)          ;; in-buffer search backward
+  (global-set-key (kbd "S-f") 'consult-ripgrep)           ;; ripgrep search
   (global-set-key (kbd "M-X" ) 'execute-extended-command) ;; emacs commands
   (global-set-key (kbd "C-x C-f") `find-file))            ;; find file by fuzzy name
 
