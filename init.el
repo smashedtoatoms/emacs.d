@@ -260,20 +260,22 @@
 ;; Git gutter, so I can see the damage done
 (use-package git-gutter
   :config
-  (global-set-key (kbd "C-c g r") 'git-gutter:revert-hunk)   ;; Revert hunk where cursor is
-  (global-set-key (kbd "C-c g n") 'git-gutter:next-hunk)     ;; Jump to next hunks
-  (global-set-key (kbd "C-c g p") 'git-gutter:previous-hunk) ;; Jump to previous hunk
-  (global-git-gutter-mode +1))
+  (global-git-gutter-mode +1)
+  :bind
+  (("C-c g r" . git-gutter:revert-hunk)     ;; Revert hunk where cursor is
+   ("C-c g n" . git-gutter:next-hunk)       ;; Jump to next hunks
+   ("C-c g p" . git-gutter:previous-hunk))) ;; Jump to previous hunk
 
 
 ;; The best way to manage multiple projects at once in one editor
 (use-package projectile
   :config
   (projectile-mode +1)
-  (define-key projectile-mode-map (kbd "C-c p") 'projectile-command-map)
   (setq projectile-project-search-path '("~/workspace/")
         projectile-globally-ignored-directories '("-/target")
-        projectile-completion-system 'ivy))
+        projectile-completion-system 'ivy)
+  :bind
+  (("C-c p" . projectile-command-map)))
 
 
 ;; Linting
@@ -303,9 +305,10 @@
 ;; Quick window switching in Emacs
 (use-package ace-window
   :config
-  (global-set-key (kbd "M-o") 'ace-window)     ;; Switch between two windows quickly
   (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)) ;; Set default keybindings for kill-ring
-  (browse-kill-ring-default-keybindings))      ;; Switch between lots of windows quickly
+  (browse-kill-ring-default-keybindings)       ;; Switch between lots of windows quickly
+  :bind
+  (("M-o" . ace-window)))                        ;; Switch between two windows quickly
 
 
 ;; Parenthesis management
@@ -313,8 +316,9 @@
   :config
   (require 'smartparens-config)
   (global-set-key (kbd "C-c b") 'sp-forward-barf-sexp)
-  (global-set-key (kbd "C-c f") 'sp-forward-slurp-sexp)
-  (global-set-key (kbd "C-c d") 'sp-unwrap-sexp))
+  :bind
+  (("C-c f" . sp-forward-slurp-sexp)
+   ("C-c d" . sp-unwrap-sexp)))
 
 
 ;; Rainbow delimiters
@@ -325,8 +329,8 @@
 
 ;; Expand region selection
 (use-package expand-region
-  :config
-  (global-set-key (kbd "C-c n") 'er/expand-region))
+  :bind
+  (("C-c n" . er/expand-region)))
 
 
 ;; Make it easy to move lines around
