@@ -1,4 +1,5 @@
-(("ace-window" . "77115afc1b0b9f633084cf7479c767988106c196")
+(("ChatGPT.el" . "331a76ed8ca814fc1b1afff9578a572c5ef58ca8")
+ ("ace-window" . "77115afc1b0b9f633084cf7479c767988106c196")
  ("apheleia" . "deab8fb972f0cbc03c6a5409564435121b5db9c2")
  ("auto-virtualenv" . "1e1542f5eb34ec5f415553bc8ddbb7f3c3ee6943")
  ("avy" . "955c8dedd68c74f3cf692c1249513f048518c4c9")

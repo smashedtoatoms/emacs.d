@@ -395,6 +395,22 @@
   (sql-set-sqli-buffer))
 
 
+;; Chat GPT, probably stupid, but fun.  This one depends on python, which is weird; however, the author seems to be
+;; working on moving it over to 100% Emacs, so it's worth keeping an eye on.
+(use-package epc) ;; explicitly adding util chatgpt handles dependencies correcly
+(use-package chatgpt
+  :straight (:host github :repo "joshcho/ChatGPT.el" :files ("dist" "*.el"))
+  :bind ("C-c q" . chatgpt-query)
+  :config
+  (require 'epc)
+  (setq chatgpt-repo-path "~/.emacs.d/straight/repos/ChatGPT.el/")
+  (setq chatgpt-query-types '(("doc" . "Please write the documentation for the following function.\n\n%s")
+                              ("bug" . "There is a bug in the following function, please help me fix it.\n\n%s")
+                              ("understand" . "What does the following function do?\n\n%s")
+                              ("improve" . "Please improve the following
+                              code.\n\n%s"))))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; Language Modes ;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;

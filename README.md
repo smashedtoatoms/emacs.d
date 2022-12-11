@@ -39,6 +39,8 @@ underlying dependencies._
   python lsp server and linter: `pip install
   'python-lsp-server[all]' black`
 - [zig tools](https://github.com/zigtools/zls) - zig lsp server
+- [chatGPT](https://github.com/acheong08/ChatGPT/wiki/Setup) - experiment
+  chatGPT client
 
 
 ## How does one use this?
