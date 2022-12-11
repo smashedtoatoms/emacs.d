@@ -6,6 +6,17 @@
 No Spacemacs, no Doom, no Evil, just bespoke artisinal Emacs.
 
 
+## Problems
+
+Dap-mode debugging doesn't work, and in my opinion it's kind of a shit-show at
+the moment.  If you use debugging, you will be better served using vscode until
+emacs has a reasonable dap-mode story.  I'd love for someone to prove me wrong
+on this.  The effort required to get dap-mode working for node and elixir with
+this emacs config is more work than I currently have time to do (node seems to
+rely on a deprecated vscode project, elixir can't find it's config files and
+doesn't init mix correctly, etc.).
+
+
 ## Prerequisites
 
 _These all need to be installed if you want everything to work with these
