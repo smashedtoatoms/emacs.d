@@ -8,13 +8,11 @@ No Spacemacs, no Doom, no Evil, just bespoke artisinal Emacs.
 
 ## Problems
 
-Dap-mode debugging doesn't work, and in my opinion it's kind of a shit-show at
-the moment.  If you use debugging, you will be better served using vscode until
-emacs has a reasonable dap-mode story.  I'd love for someone to prove me wrong
-on this.  The effort required to get dap-mode working for node and elixir with
-this emacs config is more work than I currently have time to do (node seems to
-rely on a deprecated vscode project, elixir can't find it's config files and
-doesn't init mix correctly, etc.).
+I only have dap-mode debugging working for Elixir at this point.  I am confident
+I can get it working in Go and Rust.  I have little confidence I can get it to
+work in Typescript as it is dependent on a deprecated vscode project, and if I
+have to do that, I may as well spin up vscode.  If you don't use a debugger,
+this should all just work once the prerequisites are installed.
 
 
 ## Prerequisites

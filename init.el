@@ -497,10 +497,32 @@
 (use-package elixir-mode
   :commands elixir-mode
   :hook ((elixir-mode . lsp-mode)
+         (elixir-mode . dap-mode)
          (elixir-mode . smartparens-strict-mode)
          (elixir-mode . rainbow-delimiters-mode))
   :config
-  (require 'dap-elixir))
+  (require 'dap-elixir)
+  (dap-register-debug-template
+   "Elixir Debug"
+   (list :type "Elixir"
+         :cwd nil
+         :request "launch"
+         :program nil
+         :name "Elixir Debug"
+         :startApps t
+         :dap-server-path '("~/.emacs.d/.cache/lsp/elixir-ls/debugger.sh")))
+  (dap-register-debug-template
+   "Elixir Debug Single Test: Ref Integrity Test"
+   (list :type "Elixir"
+         :cwd nil
+         :request "launch"
+         :program nil
+         :name "Elixir Debug Single Test: Ref Integrity Test"
+         :startApps t
+         :dap-server-path '("~/.emacs.d/.cache/lsp/elixir-ls/debugger.sh")
+         :taskArgs '("test/reel/agent_test.exs:90")
+         :requireFiles '("test/**/test_helper.exs"
+                         "test/reel/agent_test.exs"))))
 
 (use-package flycheck-credo
   :commands elixir-mode)
