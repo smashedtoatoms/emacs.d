@@ -6,13 +6,25 @@
 No Spacemacs, no Doom, no Evil, just bespoke artisinal Emacs.
 
 
-## Problems
+## Current Problems
+
+
+### ts-ls (minor)
+
+When you install the ts-ls language server for Typescript, it usually won't
+work.  To make it behave, I have to cd to
+`/.emacs.d/.cache/lsp/npm/typescript-language-server/lib/node_modules/typescript-language-server`
+and run `npm install` in that directory.  It works fine once you do that.  Emacs
+dependence on vscode libs is concerning.
+
+
+### dap-mode (minor)
 
 I only have dap-mode debugging working for Elixir at this point.  I am confident
-I can get it working in Go and Rust.  I have little confidence I can get it to
-work in Typescript as it is dependent on a deprecated vscode project, and if I
-have to do that, I may as well spin up vscode.  If you don't use a debugger,
-this should all just work once the prerequisites are installed.
+I can get it working in Go and Rust.  I am less confident I can get it to work
+in Typescript as it is dependent on a deprecated vscode project, and if I have
+to do that, I may as well spin up vscode.  If you don't use a debugger, this
+should all just work once the prerequisites are installed.
 
 
 ## Prerequisites
@@ -56,7 +68,10 @@ sure you check out [the next section](#what-about-lsp-support).
 If you're using a language for a language where emacs lsp handles the
 installation, you will have to choose the language server you want to install.
 Typescript will require you to install two, one for the language, and one for
-the linter.  The rest should work with the defaults.  These are the ones I use:
+the linter.  The rest should work with the defaults.  It will ask you to install
+a language server the first time you edit a file with a candidate for all
+languages that this config supports other than Go and Zig.  These are the ones I
+use:
 
 - `ts-ls` # Typescript/Javascript
 - `eslint` # Eslint for Typescript/Javascript
