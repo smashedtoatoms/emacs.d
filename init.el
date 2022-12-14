@@ -210,16 +210,33 @@
         company-dabbrev-downcase nil))             ;; Stop downcasing auth-completion results
 
 
-;; Annotate the "margins" of the mini-buffer
-(use-package marginalia
-  :init
-  (marginalia-mode))
+;; The best way to manage multiple projects at once in one editor
+(use-package projectile
+  :config
+  (projectile-mode +1)
+  (setq projectile-project-search-path '("~/workspace/")
+        projectile-globally-ignored-directories '("-/target")
+        projectile-completion-system 'ivy)
+  :bind
+  (("C-c p" . projectile-command-map)))
+
+
+;; Completing read of Emacs commands (instead of counsel)
+(use-package consult
+  :config
+  (use-package consult-projectile)
+  (require `consult-projectile)
+  (global-set-key (kbd "C-c p p") 'consult-projectile)  ;; map common usage to consult-projectile multiview
+  (global-set-key (kbd "C-c p f") 'consult-projectile)  ;; map common usage to consult-projectile multiview
+  (global-set-key (kbd "C-c p b") 'consult-projectile)) ;; map common usage to consult-projectile multiview
+
 
 
 ;; Generic narrowing-completion mechanism for lists in Emacs (instead of Ivy)
 (use-package vertico
   :config
   (vertico-mode)
+  (require 'consult-projectile)
   (global-set-key (kbd "C-s") 'isearch-forward)           ;; in-buffer search forward
   (global-set-key (kbd "C-r") 'isearch-backward)          ;; in-buffer search backward
   (global-set-key (kbd "S-f") 'consult-ripgrep)           ;; ripgrep search
@@ -227,14 +244,10 @@
   (global-set-key (kbd "C-x C-f") `find-file))            ;; find file by fuzzy name
 
 
-;; Completing read of Emacs commands (instead of counsel)
-(use-package consult)
-
-
-;; Projectile mappings for consult
-(use-package consult-projectile
+;; Annotate the "margins" of the mini-buffer
+(use-package marginalia
   :init
-  (require 'consult-projectile))
+  (marginalia-mode))
 
 
 ;; Efficient syntax highlighting framework
@@ -271,17 +284,6 @@
   (("C-c g r" . git-gutter:revert-hunk)     ;; Revert hunk where cursor is
    ("C-c g n" . git-gutter:next-hunk)       ;; Jump to next hunks
    ("C-c g p" . git-gutter:previous-hunk))) ;; Jump to previous hunk
-
-
-;; The best way to manage multiple projects at once in one editor
-(use-package projectile
-  :config
-  (projectile-mode +1)
-  (setq projectile-project-search-path '("~/workspace/")
-        projectile-globally-ignored-directories '("-/target")
-        projectile-completion-system 'ivy)
-  :bind
-  (("C-c p" . projectile-command-map)))
 
 
 ;; Linting
@@ -560,6 +562,7 @@
 ;; Emacs Lisp
 (add-hook 'emacs-lisp-mode-hook 'smartparens-strict-mode)
 (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+(add-hook 'emacs-lisp-mode-hook 'git-gutter-mode)
 
 
 ;; Sly (Common Lisp)
