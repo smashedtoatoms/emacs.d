@@ -523,7 +523,8 @@
   :hook ((elixir-mode . lsp-mode)
          (elixir-mode . dap-mode)
          (elixir-mode . smartparens-strict-mode)
-         (elixir-mode . rainbow-delimiters-mode))
+         (elixir-mode . rainbow-delimiters-mode)
+         (elixir-mode . git-gutter-mode))
   :config
   (require 'dap-elixir)
   (dap-register-debug-template
