@@ -231,6 +231,12 @@
 (use-package consult)
 
 
+;; Projectile mappings for consult
+(use-package consult-projectile
+  :init
+  (require 'consult-projectile))
+
+
 ;; Efficient syntax highlighting framework
 (use-package tree-sitter
   :config

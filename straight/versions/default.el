@@ -11,6 +11,7 @@
  ("company-mode" . "6884e3ad717419b4a64a5fab08c8cb9bd20a0b27")
  ("compat" . "7ca7d300d1d256f674f83932d2918d8e70cd28f6")
  ("consult" . "b404039f567ce296823425b641b2348482a1750e")
+ ("consult-projectile" . "5ef1ada3be767ea766255801050210f5d796deec")
  ("dap-mode" . "4444bbd96908c2b381f7b9946133827680c9fa2f")
  ("dash.el" . "3df46d7d9fe74f52a661565888e4d31fd760f0df")
  ("drag-stuff.el" . "6d06d846cd37c052d79acd0f372c13006aa7e7c8")
